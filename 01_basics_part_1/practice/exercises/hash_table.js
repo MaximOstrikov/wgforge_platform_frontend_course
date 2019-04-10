@@ -20,7 +20,11 @@ export default class HashTable {
    */
 
   hashKey(key) {
-    // your code is here
+    let hashValue = 0;
+    for (let i = 0; i < key.length; i++) {
+      hashValue += key.charCodeAt(i) + i * 'qwerty'.charCodeAt(i % 6);
+    }
+    return hashValue;
   }
 
   /**
@@ -28,7 +32,7 @@ export default class HashTable {
    */
 
   get(key) {
-    // your code here
+    return this.memory[this.hashKey(key)];
   }
 
   /**
@@ -36,7 +40,7 @@ export default class HashTable {
    */
 
   set(key, value) {
-    // your code is here
+    this.memory[this.hashKey(key)] = value;
   }
 
   /**
@@ -45,6 +49,6 @@ export default class HashTable {
    */
 
   remove(key) {
-    // your code is here
+    delete this.memory[this.hashKey(key)];
   }
 }
