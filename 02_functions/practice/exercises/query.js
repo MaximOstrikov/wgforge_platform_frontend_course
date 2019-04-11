@@ -64,7 +64,7 @@
  * Если в options есть поле escapeNames со значением true, названия полей и таблиц должны быть обёрнуты в двойные кавычки:
  *
  * const q = query({escapeNames: true});
- * q.select('name').from('people').toString()
+ * q.select('name').from('peo ple').toString()
  * > SELECT "name" FROM "people";
 
  * const q = query('books', {escapeNames: true});
@@ -86,7 +86,6 @@
 export default function query(queryName) {
   let sql = '';
   let fromCounter = 0;
-  let whereCounter = 0;
   let notEr = false;
   const select = function(selectArguments) {
     if (selectArguments) {
@@ -200,7 +199,7 @@ export default function query(queryName) {
   };
 
   const where = function(value) {
-    if (sql && whereCounter > 0) {
+    if (sql && sql.indexOf('WHERE') >= 0) {
       sql += ' AND ' + value;
     } else {
       sql += ' WHERE ' + value;
@@ -210,7 +209,7 @@ export default function query(queryName) {
   };
 
   const orWhere = function(value) {
-    if (sql && whereCounter > 0) {
+    if (sql && sql.indexOf('WHERE') >= 0) {
       sql += ' OR ' + value;
     } else {
       sql += ' WHERE ' + value;
