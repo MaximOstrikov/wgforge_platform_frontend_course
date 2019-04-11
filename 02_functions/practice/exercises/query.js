@@ -203,7 +203,6 @@ export default function query(queryName) {
       sql += ' AND ' + value;
     } else {
       sql += ' WHERE ' + value;
-      whereCounter = 1;
     }
     return whereMethods;
   };
@@ -213,7 +212,6 @@ export default function query(queryName) {
       sql += ' OR ' + value;
     } else {
       sql += ' WHERE ' + value;
-      whereCounter = 1;
     }
     return whereMethods;
   };
