@@ -56,13 +56,15 @@
  * вызове метода toString() у объекта query.
  * В конце строки SQL-запроса должен быть символ ';'
  *
+ *
+ *
  * Дополнительные задания:
  *
  * 1. Добавить в сигнатуру функии query второй опциональный аргумент options типа Object.
  * Если в options есть поле escapeNames со значением true, названия полей и таблиц должны быть обёрнуты в двойные кавычки:
  *
  * const q = query({escapeNames: true});
- * q.select('name').from('people').toString()
+ * q.select('name').from('peo ple').toString()
  * > SELECT "name" FROM "people";
 
  * const q = query('books', {escapeNames: true});
@@ -81,6 +83,143 @@
  * 3. Реализовать функциональность создания INSERT и DELETE запросов. Написать для них тесты.
  */
 
-export default function query() {
-  // ¯\_(ツ)_/¯
+export default function query(queryName) {
+  let sql = '';
+  let fromCounter = 0;
+  let notEr = false;
+  const select = function(selectArguments) {
+    if (selectArguments) {
+      sql = 'SELECT ' + selectArguments;
+    } else {
+      sql = 'SELECT *';
+    }
+    return this;
+  };
+  const from = function(tableName) {
+    if (fromCounter === 0) {
+      if (queryName) {
+        sql += ' FROM ' + queryName;
+        fromCounter = 1;
+      } else {
+        sql += ' FROM ' + tableName;
+        fromCounter = 1;
+      }
+    }
+    return this;
+  };
+
+  const whereMethods = {
+    equals(value) {
+      if (notEr) {
+        let wherePos = sql.indexOf('WHERE') + 5;
+        sql = sql.slice(0, wherePos) + ' NOT' + sql.slice(wherePos);
+      }
+      if (typeof value === 'string') {
+        sql += ' = ' + "'" + value + "'";
+      } else {
+        sql += ' = ' + value;
+      }
+      return query;
+    },
+
+    in(array) {
+      let arr = [];
+      for (let i of array) {
+        if (typeof i === 'string') {
+          arr.push("'" + i + "'");
+        } else {
+          arr.push(i);
+        }
+      }
+      if (notEr) {
+        sql += ' NOT IN (' + arr.join(', ') + ')';
+      } else {
+        sql += ' IN (' + arr.join(', ') + ')';
+      }
+      return query;
+    },
+
+    isNull() {
+      if (notEr) {
+        sql += ' IS NOT NULL';
+      } else {
+        sql += ' IS NULL';
+      }
+      return query;
+    },
+
+    not() {
+      if (notEr) {
+        throw new Error("not() can't be called multiple times in a row");
+      }
+      notEr = true;
+      return whereMethods;
+    },
+
+    gt(value) {
+      if (typeof value === 'string') {
+        sql += ' > ' + "'" + value + "'";
+      } else {
+        sql += ' > ' + value;
+      }
+      return query;
+    },
+
+    gte(value) {
+      if (typeof value === 'string') {
+        sql += ' >= ' + "'" + value + "'";
+      } else {
+        sql += ' >= ' + value;
+      }
+      return query;
+    },
+
+    lt(value) {
+      if (typeof value === 'string') {
+        sql += ' < ' + "'" + value + "'";
+      } else {
+        sql += ' < ' + value;
+      }
+      return query;
+    },
+
+    lte(value) {
+      if (typeof value === 'string') {
+        sql += ' <= ' + "'" + value + "'";
+      } else {
+        sql += ' <= ' + value;
+      }
+      return query;
+    },
+
+    between(from, to) {
+      sql += ' BETWEEN ' + from + ' AND ' + to;
+      return query;
+    }
+  };
+
+  const where = function(value) {
+    if (sql && sql.indexOf('WHERE') >= 0) {
+      sql += ' AND ' + value;
+    } else {
+      sql += ' WHERE ' + value;
+    }
+    return whereMethods;
+  };
+
+  const orWhere = function(value) {
+    if (sql && sql.indexOf('WHERE') >= 0) {
+      sql += ' OR ' + value;
+    } else {
+      sql += ' WHERE ' + value;
+    }
+    return whereMethods;
+  };
+
+  const toString = function() {
+    return sql + ';';
+  };
+  const query = { select, from, where, orWhere, toString };
+
+  return query;
 }

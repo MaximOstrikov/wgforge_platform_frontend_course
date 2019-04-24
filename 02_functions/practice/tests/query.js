@@ -1,4 +1,3 @@
-/* eslint-disable max-statements */
 import test from 'tape-catch';
 
 import query from '../exercises/query';
